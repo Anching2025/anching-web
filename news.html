@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>最新消息｜安親慈善基金會</title>
+    <meta name="description" content="安親慈善基金會的最新消息與活動資訊。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <div class="brand">
+          <img class="logo-img" src="logo.png" alt="安親慈善基金會標誌" />
+          <div>
+            <p class="brand-name">安親慈善基金會</p>
+            <p class="brand-tagline">以善為根・以愛為行</p>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="index.html">首頁</a>
+          <a href="about.html">關於我們</a>
+          <a href="programs.html">服務計畫</a>
+          <a href="transparency.html">透明公開</a>
+          <a href="volunteer.html">志工加入</a>
+          <a href="contact.html">聯絡我們</a>
+          <a class="primary" href="donate.html">立即捐款</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <p class="eyebrow">最新消息</p>
+          <h1>服務進展與公益故事</h1>
+          <p class="lead">即時分享基金會最新活動、計畫成果與合作消息。</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="grid-3" id="news-all"></div>
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="button" id="news-prev" class="ghost">上一頁</button>
+            <button type="button" id="news-next" class="ghost">下一頁</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <p class="brand-name">財團法人臺北市安親慈善基金會</p>
+          <p>以善為根・以愛為行</p>
+        </div>
+        <div>
+          <p class="footer-title">聯絡資訊</p>
+          <p>電話：(02)2788-1008</p>
+          <p>信箱：anching2025@gmail.com</p>
+          <p>地址：台北市忠孝東路六段278巷23弄29號</p>
+        </div>
+        <div>
+          <p class="footer-title">快速連結</p>
+          <a href="programs.html">服務計畫</a>
+          <a href="transparency.html">透明公開</a>
+          <a href="donate.html">捐款支持</a>
+        </div>
+        <div>
+          <p class="footer-title">登記資訊</p>
+          <p>法人登記證書：114年度法登他字第000136號</p>
+          <p>核准立案字號：北市社(4)字第39655號函</p>
+        </div>
+      </div>
+    </footer>
+    <script>
+      const SHEET_ID = "12Q5MX69gfwJPv3X0t9mw3HUgPPOiGE4Lq7EeeIWF9hE";
+      const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+      const PUBLISHED_CSV_URL =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2u68dup_nVFtwCwjLNznK08tksnLjc7uTvGqbfrfzGR0oyB39RW882RuBMqL6oJFyZnqrlI0BNszu/pub?output=csv";
+
+      function parseGviz(text) {
+        const json = text.replace("/*O_o*/\\n", "").replace("google.visualization.Query.setResponse(", "").slice(0, -2);
+        return JSON.parse(json);
+      }
+
+      function parseDateValue(value) {
+        if (!value) return "";
+        if (typeof value === "string" && value.startsWith("Date(")) {
+          const parts = value.replace("Date(", "").replace(")", "").split(",").map(Number);
+          if (parts.length >= 3) {
+            const date = new Date(parts[0], parts[1], parts[2]);
+            return date.toISOString().slice(0, 10);
+          }
+        }
+        return value;
+      }
+
+      function toDateValue(value) {
+        if (!value) return 0;
+        const normalized = parseDateValue(value);
+        const date = new Date(normalized);
+        return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+      }
+
+      function normalizeImageUrl(url) {
+        if (!url) return "";
+        if (url.includes("drive.google.com/uc?id=")) return url;
+        const fileMatch = url.match(/drive\\.google\\.com\\/file\\/d\\/([^/]+)/);
+        if (fileMatch) return `https://drive.google.com/uc?id=${fileMatch[1]}`;
+        const openMatch = url.match(/drive\\.google\\.com\\/open\\?id=([^&]+)/);
+        if (openMatch) return `https://drive.google.com/uc?id=${openMatch[1]}`;
+        return url;
+      }
+
+      function buildCard(item) {
+        const article = document.createElement("article");
+        article.className = "panel";
+        if (item.image_url) {
+          const img = document.createElement("img");
+          img.src = item.image_url;
+          img.alt = item.title;
+          img.loading = "lazy";
+          img.style.borderRadius = "14px";
+          img.style.marginBottom = "12px";
+          article.appendChild(img);
+        }
+        const tag = document.createElement("p");
+        tag.className = "tag";
+        tag.textContent = item.date;
+        const title = document.createElement("h3");
+        title.textContent = item.title;
+        const summary = document.createElement("p");
+        summary.textContent = item.summary;
+        article.append(tag, title, summary);
+        if (item.link) {
+          const link = document.createElement("a");
+          link.className = "ghost";
+          link.href = item.link;
+          link.target = "_blank";
+          link.rel = "noreferrer";
+          link.textContent = "更多內容";
+          link.style.display = "inline-block";
+          link.style.marginTop = "12px";
+          article.appendChild(link);
+        }
+        return article;
+      }
+
+      const PAGE_SIZE = 6;
+      let currentPage = 1;
+      let cachedItems = [];
+
+      function renderPage(page) {
+        const container = document.getElementById("news-all");
+        container.innerHTML = "";
+        const start = (page - 1) * PAGE_SIZE;
+        const pageItems = cachedItems.slice(start, start + PAGE_SIZE);
+        pageItems.forEach((item) => container.appendChild(buildCard(item)));
+        document.getElementById("news-prev").disabled = page <= 1;
+        document.getElementById("news-next").disabled = start + PAGE_SIZE >= cachedItems.length;
+      }
+
+      document.getElementById("news-prev").addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage -= 1;
+          renderPage(currentPage);
+        }
+      });
+
+      document.getElementById("news-next").addEventListener("click", () => {
+        if (currentPage * PAGE_SIZE < cachedItems.length) {
+          currentPage += 1;
+          renderPage(currentPage);
+        }
+      });
+
+      function parseCsv(text) {
+        const rows = [];
+        let current = [];
+        let value = "";
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i += 1) {
+          const char = text[i];
+          const next = text[i + 1];
+          if (char === "\"" && inQuotes && next === "\"") {
+            value += "\"";
+            i += 1;
+            continue;
+          }
+          if (char === "\"") {
+            inQuotes = !inQuotes;
+            continue;
+          }
+          if (char === "," && !inQuotes) {
+            current.push(value);
+            value = "";
+            continue;
+          }
+          if ((char === "\n" || char === "\r") && !inQuotes) {
+            if (value.length || current.length) {
+              current.push(value);
+              rows.push(current);
+              current = [];
+              value = "";
+            }
+            continue;
+          }
+          value += char;
+        }
+        if (value.length || current.length) {
+          current.push(value);
+          rows.push(current);
+        }
+        return rows;
+      }
+
+      function fetchCsvFallback(onSuccess, onError) {
+        const CSV_URL = PUBLISHED_CSV_URL || `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+        fetch(CSV_URL)
+          .then((res) => res.text())
+          .then((text) => {
+            const rows = parseCsv(text);
+            onSuccess(rows);
+          })
+          .catch(onError);
+      }
+
+      function loadSheetData(onSuccess, onError) {
+        if (PUBLISHED_CSV_URL) {
+          fetchCsvFallback(onSuccess, onError);
+          return;
+        }
+        const script = document.createElement("script");
+        const timeout = setTimeout(() => {
+          fetchCsvFallback(onSuccess, onError);
+        }, 8000);
+
+        window.google = window.google || {};
+        window.google.visualization = window.google.visualization || {};
+        window.google.visualization.Query = window.google.visualization.Query || {};
+        window.google.visualization.Query.setResponse = (response) => {
+          clearTimeout(timeout);
+          onSuccess(response);
+          script.remove();
+        };
+
+        script.src = `${SHEET_URL}&gid=0&cachebust=${Date.now()}`;
+        script.onerror = () => {
+          clearTimeout(timeout);
+          fetchCsvFallback(onSuccess, onError);
+        };
+        document.body.appendChild(script);
+      }
+
+      loadSheetData(
+        (data) => {
+          let header = [];
+          let rows = [];
+          if (Array.isArray(data)) {
+            header = data[0] || [];
+            rows = data.slice(1).map((row) => row.map((cell) => ({ v: cell })));
+          } else {
+            header = (data.table.cols || []).map((col) => col.label || "").map((h) => h.toLowerCase().trim());
+            rows = data.table.rows || [];
+          }
+
+          const headerIndex = {};
+          header.forEach((name, idx) => {
+            if (name) headerIndex[name.toLowerCase().trim()] = idx;
+          });
+
+          const readCell = (row, key, fallbackIndex) => {
+            const idx = headerIndex[key];
+            if (typeof idx === "number") return row[idx]?.v || row.c?.[idx]?.v || "";
+            return row[fallbackIndex]?.v || row.c?.[fallbackIndex]?.v || "";
+          };
+
+          cachedItems = rows.map((row) => ({
+            date: parseDateValue(readCell(row, "date", 0)),
+            title: readCell(row, "title", 1),
+            summary: readCell(row, "summary", 2),
+            image_url: normalizeImageUrl(readCell(row, "image_url", 3)),
+            link: readCell(row, "link", 4),
+          }));
+          cachedItems.sort((a, b) => toDateValue(b.date) - toDateValue(a.date));
+          renderPage(currentPage);
+        },
+        () => {
+          const container = document.getElementById("news-all");
+          container.innerHTML =
+            "<p>目前無法載入最新消息，請確認試算表已設為「知道連結的人可檢視」或已發佈到網路。</p>";
+        }
+      );
+    </script>
+  </body>
+</html>

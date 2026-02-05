@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>聯絡我們｜安親慈善基金會</title>
+    <meta name="description" content="安親慈善基金會聯絡資訊與留言表單。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <div class="brand">
+          <img class="logo-img" src="logo.png" alt="安親慈善基金會標誌" />
+          <div>
+            <p class="brand-name">安親慈善基金會</p>
+            <p class="brand-tagline">以善為根・以愛為行</p>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="index.html">首頁</a>
+          <a href="about.html">關於我們</a>
+          <a href="programs.html">服務計畫</a>
+          <a href="transparency.html">透明公開</a>
+          <a href="news.html">最新消息</a>
+          <a href="contact.html">聯絡我們</a>
+          <a class="primary" href="donate.html">立即捐款</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <p class="eyebrow">聯絡我們</p>
+          <h1>歡迎與我們聊聊合作或服務需求</h1>
+          <p class="lead">若你有任何問題或合作提案，請留下訊息，我們會盡快回覆。</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container hero-layout">
+          <div>
+            <h2>聯絡資訊</h2>
+            <ul class="simple-list">
+              <li>電話：(02)2788-1008</li>
+              <li>信箱：anching2025@gmail.com</li>
+              <li>地址：台北市忠孝東路六段278巷23弄29號</li>
+            </ul>
+          </div>
+          <form class="panel form" id="contact-form">
+            <h3>留言表單</h3>
+            <label>
+              姓名
+              <input id="ct-name" type="text" placeholder="請輸入姓名" required />
+            </label>
+            <label>
+              聯絡信箱
+              <input id="ct-email" type="email" placeholder="name@example.com" required />
+            </label>
+            <label>
+              主題
+              <input id="ct-subject" type="text" placeholder="例如：合作提案、服務諮詢" />
+            </label>
+            <label>
+              訊息內容
+              <textarea id="ct-message" rows="4" placeholder="請描述你的需求" required></textarea>
+            </label>
+            <button type="submit">送出訊息</button>
+            <p class="hint" id="ct-status"></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <p class="brand-name">財團法人臺北市安親慈善基金會</p>
+          <p>以善為根・以愛為行</p>
+        </div>
+        <div>
+          <p class="footer-title">聯絡資訊</p>
+          <p>電話：(02)2788-1008</p>
+          <p>信箱：anching2025@gmail.com</p>
+          <p>地址：台北市忠孝東路六段278巷23弄29號</p>
+        </div>
+        <div>
+          <p class="footer-title">快速連結</p>
+          <a href="programs.html">服務計畫</a>
+          <a href="transparency.html">透明公開</a>
+          <a href="donate.html">捐款支持</a>
+        </div>
+        <div>
+          <p class="footer-title">登記資訊</p>
+          <p>法人登記證書：114年度法登他字第000136號</p>
+          <p>核准立案字號：北市社(4)字第39655號函</p>
+        </div>
+      </div>
+    </footer>
+    <script>
+      const FORM_ENDPOINT =
+        "https://script.google.com/macros/s/AKfycbyqaGLtvjaTvUim17r4Mv7J3OKk-Xluvehxr_qO-tiQN7K_AlD8hIAPW75a5nLoX-zf/exec";
+
+      document.getElementById("contact-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const status = document.getElementById("ct-status");
+        status.textContent = "送出中，請稍候...";
+
+        const payload = {
+          type: "contact",
+          name: document.getElementById("ct-name").value.trim(),
+          email: document.getElementById("ct-email").value.trim(),
+          subject: document.getElementById("ct-subject").value.trim(),
+          message: document.getElementById("ct-message").value.trim(),
+        };
+
+        fetch(FORM_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.ok) {
+              status.textContent = "訊息已送出，我們會盡快回覆。";
+              e.target.reset();
+            } else {
+              status.textContent = "送出失敗，請稍後再試。";
+            }
+          })
+          .catch(() => {
+            status.textContent = "送出失敗，請稍後再試。";
+          });
+      });
+    </script>
+  </body>
+</html>
