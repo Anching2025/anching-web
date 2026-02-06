@@ -123,20 +123,26 @@
 
         fetch(FORM_ENDPOINT, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         })
-          .then((res) => res.json())
+          .then((res) => res.text())
           .then((data) => {
-            if (data.ok) {
+            let parsed = null;
+            try {
+              parsed = JSON.parse(data);
+            } catch (err) {
+              parsed = null;
+            }
+            if (parsed && parsed.ok) {
               status.textContent = "訊息已送出，我們會盡快回覆。";
               e.target.reset();
             } else {
-              status.textContent = "送出失敗，請稍後再試。";
+              status.textContent = `送出失敗，請稍後再試。${data ? "（" + data + "）" : ""}`;
             }
           })
-          .catch(() => {
-            status.textContent = "送出失敗，請稍後再試。";
+          .catch((err) => {
+            status.textContent = `送出失敗，請稍後再試。（${err}）`;
           });
       });
     </script>
