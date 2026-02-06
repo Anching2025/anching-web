@@ -54,27 +54,21 @@
               <li>地址：台北市忠孝東路六段278巷23弄29號</li>
             </ul>
           </div>
-          <form class="panel form" id="contact-form">
-            <h3>留言表單</h3>
-            <label>
-              姓名
-              <input id="ct-name" type="text" placeholder="請輸入姓名" required />
-            </label>
-            <label>
-              聯絡信箱
-              <input id="ct-email" type="email" placeholder="name@example.com" required />
-            </label>
-            <label>
-              主題
-              <input id="ct-subject" type="text" placeholder="例如：合作提案、服務諮詢" />
-            </label>
-            <label>
-              訊息內容
-              <textarea id="ct-message" rows="4" placeholder="請描述你的需求" required></textarea>
-            </label>
-            <button type="submit">送出訊息</button>
-            <p class="hint" id="ct-status"></p>
-          </form>
+          <div class="panel form">
+            <h3>聯絡我們表單</h3>
+            <p>請直接在下方表單填寫送出，我們會盡快回覆。</p>
+            <iframe
+              title="聯絡我們表單"
+              src="https://docs.google.com/forms/d/e/1FAIpQLSfDh_C7nGPTx1IdzoKhUEA-G9WXQlO7_2h4SF3lDxt5Fcdfvw/viewform?usp=pp_url"
+              width="100%"
+              height="780"
+              frameborder="0"
+              marginheight="0"
+              marginwidth="0"
+            >
+              載入中…
+            </iframe>
+          </div>
         </div>
       </section>
     </main>
@@ -104,37 +98,5 @@
         </div>
       </div>
     </footer>
-    <script>
-      const FORM_ENDPOINT =
-        "https://script.google.com/macros/s/AKfycbyVr7G14Dl1XMWslkh9Mk169iyk6Ant2bhQlCgnVQVG6yeOdkk4sS28ORi_F_5vtW6L/exec";
-
-      document.getElementById("contact-form").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const status = document.getElementById("ct-status");
-        status.textContent = "送出中，請稍候...";
-
-        const payload = {
-          type: "contact",
-          name: document.getElementById("ct-name").value.trim(),
-          email: document.getElementById("ct-email").value.trim(),
-          subject: document.getElementById("ct-subject").value.trim(),
-          message: document.getElementById("ct-message").value.trim(),
-        };
-
-        fetch(FORM_ENDPOINT, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
-        })
-          .then(() => {
-            status.textContent = "已送出（請至試算表確認）。";
-            e.target.reset();
-          })
-          .catch((err) => {
-            status.textContent = `送出失敗，請稍後再試。（${err}）`;
-          });
-      });
-    </script>
   </body>
 </html>

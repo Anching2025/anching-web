@@ -55,39 +55,21 @@
             </ul>
             <p class="callout">提供完整培訓與督導支持，讓你安心投入。</p>
           </div>
-          <form class="panel form" id="volunteer-form">
-            <h3>志工報名</h3>
-            <label>
-              姓名
-              <input id="vol-name" type="text" placeholder="請輸入姓名" required />
-            </label>
-            <label>
-              聯絡電話
-              <input id="vol-phone" type="tel" placeholder="09xx-xxx-xxx" />
-            </label>
-            <label>
-              聯絡信箱
-              <input id="vol-email" type="email" placeholder="name@example.com" required />
-            </label>
-            <label>
-              想投入的服務
-              <select id="vol-service">
-                <option>兒少陪伴</option>
-                <option>社區關懷</option>
-                <option>行政支援</option>
-              </select>
-            </label>
-            <label>
-              可服務時段
-              <input id="vol-time" type="text" placeholder="平日晚上 / 週末上午" />
-            </label>
-            <label>
-              備註
-              <textarea id="vol-note" rows="3" placeholder="想補充的內容"></textarea>
-            </label>
-            <button type="submit">送出報名</button>
-            <p class="hint" id="vol-status"></p>
-          </form>
+          <div class="panel form">
+            <h3>志工報名表單</h3>
+            <p>請直接在下方表單填寫送出，我們會收到你的資料。</p>
+            <iframe
+              title="志工報名表單"
+              src="https://docs.google.com/forms/d/e/1FAIpQLSdkIplugUdHI0Nsl-_Xa9E2H5QbKoDj6RZnQG9msWPqBIZm2g/viewform?usp=pp_url"
+              width="100%"
+              height="880"
+              frameborder="0"
+              marginheight="0"
+              marginwidth="0"
+            >
+              載入中…
+            </iframe>
+          </div>
         </div>
       </section>
     </main>
@@ -117,39 +99,5 @@
         </div>
       </div>
     </footer>
-    <script>
-      const FORM_ENDPOINT =
-        "https://script.google.com/macros/s/AKfycbyVr7G14Dl1XMWslkh9Mk169iyk6Ant2bhQlCgnVQVG6yeOdkk4sS28ORi_F_5vtW6L/exec";
-
-      document.getElementById("volunteer-form").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const status = document.getElementById("vol-status");
-        status.textContent = "送出中，請稍候...";
-
-        const payload = {
-          type: "volunteer",
-          name: document.getElementById("vol-name").value.trim(),
-          phone: document.getElementById("vol-phone").value.trim(),
-          email: document.getElementById("vol-email").value.trim(),
-          service: document.getElementById("vol-service").value,
-          time: document.getElementById("vol-time").value.trim(),
-          note: document.getElementById("vol-note").value.trim(),
-        };
-
-        fetch(FORM_ENDPOINT, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
-        })
-          .then(() => {
-            status.textContent = "已送出（請至試算表確認）。";
-            e.target.reset();
-          })
-          .catch((err) => {
-            status.textContent = `送出失敗，請稍後再試。（${err}）`;
-          });
-      });
-    </script>
   </body>
 </html>
