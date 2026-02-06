@@ -138,27 +138,13 @@
 
         fetch(FORM_ENDPOINT, {
           method: "POST",
+          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload),
         })
-          .then(async (res) => {
-            const text = await res.text();
-            return { status: res.status, ok: res.ok, text };
-          })
-          .then((res) => {
-            let parsed = null;
-            try {
-              parsed = JSON.parse(res.text);
-            } catch (err) {
-              parsed = null;
-            }
-            if (parsed && parsed.ok) {
-              status.textContent = "已收到你的報名，謝謝你！";
-              e.target.reset();
-            } else {
-              const detail = res.text ? res.text.slice(0, 160) : "回應為空";
-              status.textContent = `送出失敗（HTTP ${res.status}）。${detail}`;
-            }
+          .then(() => {
+            status.textContent = "已送出（請至試算表確認）。";
+            e.target.reset();
           })
           .catch((err) => {
             status.textContent = `送出失敗，請稍後再試。（${err}）`;
