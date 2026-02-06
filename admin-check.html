@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>表單後台檢查｜安親慈善基金會</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <div class="brand">
+          <img class="logo-img" src="logo.png" alt="安親慈善基金會標誌" />
+          <div>
+            <p class="brand-name">安親慈善基金會</p>
+            <p class="brand-tagline">表單後台檢查</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <p class="eyebrow">後台檢查</p>
+          <h1>檢查 Apps Script 是否可被存取</h1>
+          <p class="lead">此頁面僅供管理員檢查表單後端連線。</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container grid-2">
+          <div class="panel">
+            <h3>1. 直接開啟後端網址</h3>
+            <p>應該會看到「OK」。若出現權限或找不到函式，代表部署設定有問題。</p>
+            <a class="primary" id="open-endpoint" href="#" target="_blank" rel="noreferrer">開啟後端</a>
+          </div>
+          <div class="panel">
+            <h3>2. 傳送測試資料</h3>
+            <p>傳送一筆測試資料到志工試算表（no-cors）。</p>
+            <button type="button" id="send-test">送出測試</button>
+            <p class="hint" id="test-status"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const FORM_ENDPOINT =
+        "https://script.google.com/macros/s/AKfycbyVr7G14Dl1XMWslkh9Mk169iyk6Ant2bhQlCgnVQVG6yeOdkk4sS28ORi_F_5vtW6L/exec";
+
+      document.getElementById("open-endpoint").href = FORM_ENDPOINT;
+
+      document.getElementById("send-test").addEventListener("click", () => {
+        const status = document.getElementById("test-status");
+        status.textContent = "送出中...";
+        const payload = {
+          type: "volunteer",
+          name: "測試",
+          phone: "0000",
+          email: "test@example.com",
+          service: "測試",
+          time: "測試",
+          note: "admin-check",
+        };
+
+        fetch(FORM_ENDPOINT, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+        })
+          .then(() => {
+            status.textContent = "已送出測試資料（請到試算表確認是否新增）。";
+          })
+          .catch((err) => {
+            status.textContent = `送出失敗（${err}）`;
+          });
+      });
+    </script>
+  </body>
+</html>
