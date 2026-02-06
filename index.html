@@ -157,6 +157,8 @@
       const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
       const PUBLISHED_CSV_URL =
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2u68dup_nVFtwCwjLNznK08tksnLjc7uTvGqbfrfzGR0oyB39RW882RuBMqL6oJFyZnqrlI0BNszu/pub?output=csv";
+      const PUBLISHED_GVIZ_URL =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2u68dup_nVFtwCwjLNznK08tksnLjc7uTvGqbfrfzGR0oyB39RW882RuBMqL6oJFyZnqrlI0BNszu/gviz/tq?tqx=out:json";
 
       function parseGviz(text) {
         const json = text.replace("/*O_o*/\\n", "").replace("google.visualization.Query.setResponse(", "").slice(0, -2);
@@ -227,6 +229,7 @@
       }
 
       function parseCsv(text) {
+        const delimiter = text.split("\n")[0]?.includes("\t") ? "\t" : ",";
         const rows = [];
         let current = [];
         let value = "";
@@ -243,7 +246,7 @@
             inQuotes = !inQuotes;
             continue;
           }
-          if (char === "," && !inQuotes) {
+          if (char === delimiter && !inQuotes) {
             current.push(value);
             value = "";
             continue;
@@ -263,11 +266,15 @@
           current.push(value);
           rows.push(current);
         }
+        if (rows.length && rows[0][0]) {
+          rows[0][0] = rows[0][0].replace(/^\uFEFF/, "");
+        }
         return rows;
       }
 
       function fetchCsvFallback(onSuccess, onError) {
-        const CSV_URL = PUBLISHED_CSV_URL || `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+        const CSV_URL =
+          PUBLISHED_CSV_URL || `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
         fetch(CSV_URL)
           .then((res) => res.text())
           .then((text) => {
@@ -278,10 +285,6 @@
       }
 
       function loadSheetData(onSuccess, onError) {
-        if (PUBLISHED_CSV_URL) {
-          fetchCsvFallback(onSuccess, onError);
-          return;
-        }
         const script = document.createElement("script");
         const timeout = setTimeout(() => {
           fetchCsvFallback(onSuccess, onError);
@@ -296,7 +299,8 @@
           script.remove();
         };
 
-        script.src = `${SHEET_URL}&gid=0&cachebust=${Date.now()}`;
+        const gvizUrl = PUBLISHED_GVIZ_URL || SHEET_URL;
+        script.src = `${gvizUrl}&gid=0&cachebust=${Date.now()}`;
         script.onerror = () => {
           clearTimeout(timeout);
           fetchCsvFallback(onSuccess, onError);
@@ -318,11 +322,24 @@
 
           const headerIndex = {};
           header.forEach((name, idx) => {
-            if (name) headerIndex[name.toLowerCase().trim()] = idx;
+            if (!name) return;
+            const key = name.toLowerCase().replace(/\s+/g, "_").trim();
+            headerIndex[key] = idx;
           });
 
+          const alias = {
+            "image url": "image_url",
+            "image-url": "image_url",
+            "imageurl": "image_url",
+            "date": "date",
+            "title": "title",
+            "summary": "summary",
+            "link": "link",
+          };
+
           const readCell = (row, key, fallbackIndex) => {
-            const idx = headerIndex[key];
+            const mapped = alias[key] || key;
+            const idx = headerIndex[mapped];
             if (typeof idx === "number") return row[idx]?.v || row.c?.[idx]?.v || "";
             return row[fallbackIndex]?.v || row.c?.[fallbackIndex]?.v || "";
           };
@@ -343,7 +360,7 @@
         () => {
           const container = document.getElementById("news-latest");
           container.innerHTML =
-            "<p>目前無法載入最新消息，請確認試算表已設為「知道連結的人可檢視」或已發佈到網路。</p>";
+            "<p>目前無法載入最新消息，請確認試算表已發佈到網路，或改用 GitHub Pages 開啟本站。</p>";
         }
       );
     </script>
